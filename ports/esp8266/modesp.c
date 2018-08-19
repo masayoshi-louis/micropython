@@ -66,6 +66,18 @@ STATIC mp_obj_t esp_sleep_type(size_t n_args, const mp_obj_t *args) {
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(esp_sleep_type_obj, 0, 1, esp_sleep_type);
 
+STATIC mp_obj_t esp_gpio_pin_wakeup_enable(mp_obj_t py_pin, mp_obj_t py_level)
+{
+    mp_int_t pin = mp_obj_get_int(py_pin);
+    mp_int_t level = mp_obj_get_int(py_level);
+    if (level)
+        gpio_pin_wakeup_enable(GPIO_ID_PIN(pin), GPIO_PIN_INTR_HILEVEL);
+    else
+        gpio_pin_wakeup_enable(GPIO_ID_PIN(pin), GPIO_PIN_INTR_LOLEVEL);
+    return mp_obj_new_int((pin << 1) | level);
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(esp_gpio_pin_wakeup_enable_obj, esp_gpio_pin_wakeup_enable);
+
 STATIC mp_obj_t esp_deepsleep(size_t n_args, const mp_obj_t *args) {
     uint32_t sleep_us = n_args > 0 ? mp_obj_get_int(args[0]) : 0;
     // prepare for RTC reset at wake up
@@ -352,6 +364,7 @@ STATIC const mp_rom_map_elem_t esp_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_osdebug), MP_ROM_PTR(&esp_osdebug_obj) },
     { MP_ROM_QSTR(MP_QSTR_sleep_type), MP_ROM_PTR(&esp_sleep_type_obj) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_gpio_pin_wakeup_enable), (mp_obj_t)&esp_gpio_pin_wakeup_enable_obj },
     { MP_ROM_QSTR(MP_QSTR_deepsleep), MP_ROM_PTR(&esp_deepsleep_obj) },
     { MP_ROM_QSTR(MP_QSTR_flash_id), MP_ROM_PTR(&esp_flash_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_flash_read), MP_ROM_PTR(&esp_flash_read_obj) },
